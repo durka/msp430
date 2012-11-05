@@ -11,36 +11,21 @@
 
 #define DOT_MS 50
 
-void sleep(unsigned int ms)
-{
-    unsigned int m;
-    unsigned long i;
-
-    /* assume MCLK is running at 1MHz */
-    for (m = 0; m < ms; ++m)
-    {
-        /* wild, uncalibrated guess */
-        for (i = 0; i < 100; ++i);
-    }
-}
-
-void flash(int duration)
-{
-    PxOUT(LED_PORT) |= 1<<LED_PIN;
-
-    sleep(duration);
-
-    PxOUT(LED_PORT) &= ~(1<<LED_PIN);
-}
+#define MS_TO_CYC (unsigned long)1000
+#define sleep(ms) __delay_cycles(ms*MS_TO_CYC)
 
 void dot()
 {
-    flash(DOT_MS);
+    PxOUT(LED_PORT) |= 1<<LED_PIN;
+    sleep(DOT_MS);
+    PxOUT(LED_PORT) &= ~(1<<LED_PIN);
 }
 
 void dash()
 {
-    flash(DOT_MS * 3);
+    PxOUT(LED_PORT) |= 1<<LED_PIN;
+    sleep(DOT_MS * 3);
+    PxOUT(LED_PORT) &= ~(1<<LED_PIN);
 }
 
 char* morse_code[] = {
@@ -125,11 +110,15 @@ int main(void)
     BCSCTL1 = CALBC1_1MHZ;
     DCOCTL = CALDCO_1MHZ;
 
-    PxDIR(LED_PORT) |= LED_PIN;
+    PxDIR(LED_PORT) |= 1<<LED_PIN;
     PxOUT(LED_PORT) &= ~(1<<LED_PIN);
 
     while (1)
     {
+        //PxOUT(LED_PORT) |= 1<<LED_PIN;
+        //sleep(100);
+        //PxOUT(LED_PORT) &= ~(1<<LED_PIN);
+        //sleep(100);
         morse_str("SOS");
         sleep(1000);
     }
