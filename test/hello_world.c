@@ -9,10 +9,17 @@
 #define LED_PORT 1
 #define LED_PIN  6
 
-#define DOT_MS 50
+#define DOT_MS 150
 
 #define MS_TO_CYC (unsigned long)1000
-#define sleep(ms) __delay_cycles(ms*MS_TO_CYC)
+inline void sleep(unsigned long ms)
+{
+	unsigned long j;
+	for (j = 0; j < ms; ++j)
+	{
+		__delay_cycles(MS_TO_CYC);
+	}
+}
 
 void dot()
 {
@@ -54,6 +61,16 @@ char* morse_code[] = {
     ".--",   /* W */
     "-..-",  /* Y */
     "--..",  /* Z */
+    "-----", /* 0 */
+    ".----", /* 1 */
+    "..---", /* 2 */
+    "...--", /* 3 */
+    "....-", /* 4 */
+    ".....", /* 5 */
+    "-....", /* 6 */
+    "--...", /* 7 */
+    "---..", /* 8 */
+    "----.", /* 9 */
 };
 
 void morse_send(char *code)
@@ -71,33 +88,36 @@ void morse_send(char *code)
                 dash();
                 break;
         }
+	sleep(DOT_MS);
     }
 }
 
 void morse_char(char c)
 {
     if (c >= 'A' && c <= 'Z')
-        morse_send(morse_code[c - 'A']);
+	    morse_send(morse_code[c - 'A']);
     else if (c >= 'a' && c <= 'z')
-        morse_send(morse_code[c - 'a']);
+	    morse_send(morse_code[c - 'a']);
+    else if (c >= '0' && c <= '9')
+	    morse_send(morse_code[c - '0' + 25]);
 
     sleep(DOT_MS);
 }
 
 void morse_str(char *s)
 {
-    int i;
+    int i, j;
 
     for (i = 0; s[i]; ++i)
     {
         switch (s[i])
         {
             case ' ':
-                sleep(DOT_MS * 6);
+		sleep(DOT_MS * 6);
                 break;
             default: /* assuming A-Za-z */
                 morse_char(s[i]);
-                sleep(DOT_MS * 3);
+		sleep(DOT_MS * 3);
                 break;
         }
     }
@@ -105,6 +125,8 @@ void morse_str(char *s)
 
 int main(void)
 {
+    int j;
+
     WDTCTL = WDTPW + WDTHOLD;
     DCOCTL = 0;
     BCSCTL1 = CALBC1_1MHZ;
@@ -119,8 +141,9 @@ int main(void)
         //sleep(100);
         //PxOUT(LED_PORT) &= ~(1<<LED_PIN);
         //sleep(100);
-        morse_str("SOS");
-        sleep(1000);
+        morse_str("MSP430 Launchpad");
+	// -- ... .--. ....- ...-- -----    .-.. .- ..- -. -.-. .... .--. .- -..
+	sleep(1000);
     }
 
     return 0;
