@@ -42,3 +42,24 @@ inline void pinMode(Port port, Pin pin, PinMode mode)
 }
 #undef pcase
 
+void shiftOut(Port dataport, Pin datapin, Port clockport, Pin clockpin, BitOrder order, byte data)
+{
+    byte i;
+
+    for (i = 0; i < 8; ++i)            // loop through all 8 bits
+    {
+        if (order == LSBFIRST)            // LSB first?
+        {
+            digitalWrite(dataport, datapin, !!(data & (1 << i)));
+            // shift out a bit
+        }
+        else
+        {
+            digitalWrite(dataport, datapin, !!(data & (1 << (7 - i))));
+        }
+     
+        digitalWrite(clockport, clockpin, HIGH); // pulse the clock
+        digitalWrite(clockport, clockpin, LOW);
+    }
+}
+
