@@ -10,7 +10,7 @@ typedef struct
     unsigned long dot_ms;
 } Morse;
 
-Morse morse(Port port, Pin pin, unsigned long dot_ms);
+void morse(Morse* this, Port port, Pin pin, unsigned long dot_ms);
 void morse_dot(const Morse*);
 void morse_dash(const Morse*);
 void morse_send(const Morse*, const char*);

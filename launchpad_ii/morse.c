@@ -1,13 +1,11 @@
 #include "morse.h"
 
-Morse morse(Port port, Pin pin, unsigned long dot_ms)
+void morse(Morse *this, Port port, Pin pin, unsigned long dot_ms)
 {
-    Morse this;
-    this.port = port;
-    this.pin = pin;
-    this.dot_ms = dot_ms;
+    this->port = port;
+    this->pin = pin;
+    this->dot_ms = dot_ms;
     pinMode(port, pin, OUTPUT);
-    return this;
 }
 
 void morse_dot(const Morse* this)
