@@ -189,7 +189,7 @@ void lcd_init(NokiaLCD *this, Port port, Pin sce, Pin reset, Pin dc, Pin sdin, P
     lcd_write(this,  LCD_CMD, 0x21 ); // LCD Extended Commands.
     lcd_write(this,  LCD_CMD, 0xBf ); // Set LCD Vop (Contrast). //B1
     lcd_write(this,  LCD_CMD, 0x04 ); // Set Temp coefficent. //0x04
-    lcd_write(this,  LCD_CMD, 0x12 ); // LCD bias mode 1:48. //0x13
+    lcd_write(this,  LCD_CMD, 0x10 ); // LCD bias mode 1:48. //0x13
     lcd_write(this,  LCD_CMD, 0x0C ); // LCD in normal mode. 
                                //   0x0d for inverse
     lcd_write(this, LCD_C, 0x20);
