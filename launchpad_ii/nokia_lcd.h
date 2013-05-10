@@ -8,12 +8,21 @@
 * November 2010
 */
 
+
+/* TODO
+ * some more flexible screen buffering method
+ * currently: buffer only left half of the screen, ignore bugs
+ * idea: "small" window buffer in RAM, whole buffer in flash
+ *       graphics allowed only in one window at a time
+ *       in theory, could even do window layering
+ */
+
 #ifndef _BURKA_NOKIA_LCD_H_
 #define _BURKA_NOKIA_LCD_H_
 
 #include "common.h"
 
-#define LCD_X     42 // screen width
+#define LCD_X     42 // screen width (really it's 84, see TODO above)
 #define LCD_Y     48 // screen height
 
 typedef struct

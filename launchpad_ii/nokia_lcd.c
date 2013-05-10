@@ -196,7 +196,7 @@ void lcd_init(NokiaLCD *this, Port port, Pin sce, Pin reset, Pin dc, Pin sdin, P
     lcd_write(this, LCD_C, 0x0C);
 
     // clear internal state
-    memset(this->buf, 0, sizeof(byte)*42*6);
+    memset(this->buf, 0, sizeof(byte)*LCD_X*LCD_Y/8);
     this->lcd_x = this->lcd_y = 0;
 }
 
