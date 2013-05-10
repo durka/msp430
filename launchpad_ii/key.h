@@ -8,7 +8,7 @@ typedef struct
     Port port;
     Pin pin;
 
-    byte val;
+    unsigned short val;
     char key;
 } Key;
 

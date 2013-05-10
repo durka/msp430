@@ -13,7 +13,7 @@ all: main
 %: %.elf
 	$(UPLOAD) rf2500 "prog $<"
 
-%.elf: %.c morse.o nokia_lcd.o common.o
+%.elf: %.c morse.o nokia_lcd.o key.o common.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 %.o: %.c %.h common.o
