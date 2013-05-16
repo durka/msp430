@@ -36,10 +36,9 @@ int main(void)
     lcd_clear(&nokia);
     lcd_gotoxy(&nokia, 0, 0);
     lcd_string(&nokia, "HI");
-    lcd_gotoxy(&nokia, 1, 1);
-    sleep(10);
+    lcd_gotoxy(&nokia, 0, 1);
+    lcd_char(&nokia, '>');
 
-    int x;
     while (1)
     {
         //PxOUT(LED_PORT) |= 1<<LED_PIN;
@@ -48,38 +47,42 @@ int main(void)
         //sleep(100);
         //morse_str(&jim, "4");
         // -- ... .--. ....- ...-- -----    .-.. .- ..- -. -.-. .... .--. .- -..
-        sleep(50);
-        x = nokia.lcd_x;
-        lcd_gotoxy(&nokia, 0, nokia.lcd_y);
-        lcd_char(&nokia, '>');
-        lcd_gotoxy(&nokia, x, nokia.lcd_y);
-        switch (board.key)
+        sleep(100);
+        char c;
+        while ((c = key_get(&board)) != EOF)
         {
-            case '\0':
-                break;
-                
-            case '*':
-                nokia.lcd_y++;
-                if (nokia.lcd_y > LCD_Y/8)
-                {
-                    nokia.lcd_y = 1;
-                }
-                nokia.lcd_x = 1;
-                lcd_gotoxy(&nokia, nokia.lcd_x, nokia.lcd_y);
-                break;
+            switch (c)
+            {
+                case '\0':
+                    break;
 
-            case '#':
-                nokia.lcd_x--;
-                if (nokia.lcd_x < 1)
-                {
-                    nokia.lcd_x = 1;
-                }
-                lcd_gotoxy(&nokia, nokia.lcd_x, nokia.lcd_y);
-                break;
+                case '*':
+                    nokia.lcd_y++;
+                    if (nokia.lcd_y >= LCD_Y/8)
+                    {
+                        nokia.lcd_y = 1;
+                    }
+                    lcd_gotoxy(&nokia, 1, nokia.lcd_y);
+                    break;
 
-            default:
-                lcd_char(&nokia, board.key);
-                break;
+                case '#':
+                    lcd_clear(&nokia);
+                    lcd_gotoxy(&nokia, 0, 0);
+                    lcd_string(&nokia, "HI");
+                    lcd_gotoxy(&nokia, 1, 1);
+                    break;
+
+                default:
+                {
+                    int y = nokia.lcd_y;
+                    lcd_char(&nokia, c);
+                    if (nokia.lcd_y != y)
+                    {
+                        lcd_char(&nokia, '>');
+                    }
+                    break;
+                }
+            }
         }
     }
 
