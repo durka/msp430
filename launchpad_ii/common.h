@@ -27,6 +27,8 @@ void sleep(unsigned long ms);
 void digitalWrite(Port port, Pin pin, PinState state);
 void pinMode(Port port, Pin pin, PinMode mode);
 void shiftOut(Port dataport, Pin datapin, Port clockport, Pin clockpin, BitOrder order, byte data);
+void flashWrite(byte *source, byte page, unsigned short offset, unsigned short len);
+void flashRead(byte *dest, byte page, unsigned short offset, unsigned short len);
 
 // TODO: MSP430 class, w/ utilities for watchdog, dco calib, etc? then we can track MS_TO_CYC
 

@@ -29,7 +29,97 @@
 
 #define LCD_CMD   0  // same as LCD_C
 
+// some private function prototypes
+void lcd_raw_clear(NokiaLCD *this);
+void lcd_raw_write(NokiaLCD *this, byte dc, byte data);
+void lcd_raw_gotoxy(NokiaLCD *this, int xx, int yy);
+void lcd_save(NokiaLCD *this, bool full);
+void lcd_load(NokiaLCD *this, bool full);
+
 #include "nokia_font.inc"
+
+// save the screen buffer to flash (set this->page first)
+void lcd_save(NokiaLCD *this, bool full)
+{
+    if (full)
+    {
+        flashWrite((byte*)&this->s, this->page, 0, sizeof(LCDState));
+    }
+    else
+    {
+        flashWrite((byte*)&this->s.flat, this->page, 0, 256);
+    }
+}
+
+// load the screen buffer from flash (set this->page first)
+void lcd_load(NokiaLCD *this, bool full)
+{
+    if (full)
+    {
+        flashRead((byte*)&this->s, this->page, 0, sizeof(LCDState));
+    }
+    else
+    {
+        flashRead((byte*)&this->s.flat, this->page, 0, 256);
+    }
+}
+
+// switch to a new window location
+void lcd_window(NokiaLCD *this, byte left, byte top, byte width, byte height)
+{
+    lcd_save(this, false);
+    this->s.left = left;
+    this->s.top = top;
+    this->s.width = width;
+    this->s.height = height;
+    this->s.x = this->s.y = 0;
+    lcd_load(this, false);
+}
+
+// turn on and reset the LCD
+void lcd_init(NokiaLCD *this, Port port, Pin sce, Pin reset, Pin dc, Pin sdin, Pin sclk, byte left, byte top, byte width, byte height)
+{
+    this->port = port;
+    this->SCE = sce;
+    this->RESET = reset;
+    this->DC = dc;
+    this->SDIN = sdin;
+    this->SCLK = sclk;
+
+    // set up comm pins
+    pinMode(this->port, this->SCE,   OUTPUT);
+    pinMode(this->port, this->RESET, OUTPUT);
+    pinMode(this->port, this->DC,    OUTPUT);
+    pinMode(this->port, this->SDIN,  OUTPUT);
+    pinMode(this->port, this->SCLK,  OUTPUT);
+
+    // reset the screen
+    digitalWrite(this->port, this->RESET, LOW);
+    sleep(1);
+    digitalWrite(this->port, this->RESET, HIGH);
+
+    lcd_write(this,  LCD_CMD, 0x21 ); // LCD Extended Commands.
+    lcd_write(this,  LCD_CMD, 0xBf ); // Set LCD Vop (Contrast). //B1
+    lcd_write(this,  LCD_CMD, 0x03 ); // Set Temp coefficent. //0x04
+    lcd_write(this,  LCD_CMD, 0x13 ); // LCD bias mode 1:48. //0x13
+    lcd_write(this,  LCD_CMD, 0x0C ); // LCD in normal mode. 
+                               //   0x0d for inverse
+    lcd_write(this, LCD_C, 0x20);
+    lcd_write(this, LCD_C, 0x0C);
+
+    // flash stuff
+    this->page = 31; // page 31 is the only one available (see hacked memory.x)
+    this->s.left = left;
+    this->s.top = top;
+    this->s.width = width;
+    this->s.height = height;
+
+    // clear internal state
+    memset(this->s.buf, 0, sizeof(byte) * this->s.width * this->s.height);
+    lcd_raw_clear(this);
+    this->s.x = this->s.y = 0;
+    lcd_raw_gotoxy(this, this->s.left, this->s.top);
+}
 
 // draw a char onscreen at the current position
 void lcd_char(NokiaLCD *this, const char character)
@@ -67,51 +157,6 @@ void lcd_raw_clear(NokiaLCD *this)
     {
         lcd_raw_write(this, LCD_D, 0x00);
     }
-}
-
-// turn on and reset the LCD
-void lcd_init(NokiaLCD *this, Port port, Pin sce, Pin reset, Pin dc, Pin sdin, Pin sclk, byte left, byte top, byte width, byte height)
-{
-    this->port = port;
-    this->SCE = sce;
-    this->RESET = reset;
-    this->DC = dc;
-    this->SDIN = sdin;
-    this->SCLK = sclk;
-
-    // set up comm pins
-    pinMode(this->port, this->SCE,   OUTPUT);
-    pinMode(this->port, this->RESET, OUTPUT);
-    pinMode(this->port, this->DC,    OUTPUT);
-    pinMode(this->port, this->SDIN,  OUTPUT);
-    pinMode(this->port, this->SCLK,  OUTPUT);
-
-    // reset the screen
-    digitalWrite(this->port, this->RESET, LOW);
-    sleep(1);
-    digitalWrite(this->port, this->RESET, HIGH);
-
-    lcd_write(this,  LCD_CMD, 0x21 ); // LCD Extended Commands.
-    lcd_write(this,  LCD_CMD, 0xBf ); // Set LCD Vop (Contrast). //B1
-    lcd_write(this,  LCD_CMD, 0x03 ); // Set Temp coefficent. //0x04
-    lcd_write(this,  LCD_CMD, 0x13 ); // LCD bias mode 1:48. //0x13
-    lcd_write(this,  LCD_CMD, 0x0C ); // LCD in normal mode. 
-                               //   0x0d for inverse
-    lcd_write(this, LCD_C, 0x20);
-    lcd_write(this, LCD_C, 0x0C);
-
-    // stub out the flash stuff
-    this->page = 0;
-    this->s.left = left;
-    this->s.top = top;
-    this->s.width = width;
-    this->s.height = height;
-
-    // clear internal state
-    memset(this->s.buf, 0, sizeof(byte) * this->s.width * this->s.height);
-    lcd_raw_clear(this);
-    this->s.x = this->s.y = 0;
-    lcd_raw_gotoxy(this->s.left, this->s.top);
 }
 
 // draw a string onscreen starting at the current position

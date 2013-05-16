@@ -25,8 +25,14 @@
 #define LCD_X     84 // screen width
 #define LCD_Y     48 // screen height
 
-typedef struct __attribute__((__packed__))
+typedef struct
 {
+    // screen buffer
+    union {
+        byte flat[256]; // variable width array
+        byte **buf;
+    };
+
     byte left,   // x coord of left top corner (0-84)
          top,    // y coord of left top corner (0-6)
          width,  // width of window (1-84)
@@ -34,11 +40,6 @@ typedef struct __attribute__((__packed__))
          // width*height <= 32
 
     byte x, y; // current position
-
-    union {
-        byte flat[256]; // variable width array
-        byte **buf;
-    };
 
 } LCDState;
 
@@ -62,11 +63,12 @@ typedef struct
 } NokiaLCD;
 
 // LCD functions
+void lcd_init(NokiaLCD *this, Port port, Pin sce, Pin reset, Pin dc, Pin sdin, Pin sclk, byte left, byte top, byte width, byte height); // turn on and reset the LCD
+void lcd_window(NokiaLCD *this, byte left, byte top, byte width, byte height);
+void lcd_clear(NokiaLCD *this);     // clear the screen
 void lcd_char(NokiaLCD *this, const char character);
                          // draw a char onscreen at the
                          //   current position
-void lcd_clear(NokiaLCD *this);     // clear the screen
-void lcd_init(NokiaLCD *this, Port port, Pin sce, Pin reset, Pin dc, Pin sdin, Pin sclk, byte left, byte top, byte width, byte height); // turn on and reset the LCD
 void lcd_string(NokiaLCD *this, const char *characters);
                          // draw a string onscreen starting
                          //   at the current position

@@ -72,3 +72,15 @@ void shiftOut(Port dataport, Pin datapin, Port clockport, Pin clockpin, BitOrder
     }
 }
 
+void flashWrite(byte *source, byte page, unsigned short offset, unsigned short len)
+{
+    byte *flashptr;
+    unsigned int i;
+
+    flashptr = (byte*)(0xFFFF - (page+1)*512 + 1);
+}
+
+void flashRead(byte *dest, byte page, unsigned short offset, unsigned short len)
+{
+}
+
