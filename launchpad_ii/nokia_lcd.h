@@ -22,8 +22,25 @@
 
 #include "common.h"
 
-#define LCD_X     42 // screen width (really it's 84, see TODO above)
+#define LCD_X     84 // screen width
 #define LCD_Y     48 // screen height
+
+typedef struct __attribute__((__packed__))
+{
+    byte left,   // x coord of left top corner (0-84)
+         top,    // y coord of left top corner (0-6)
+         width,  // width of window (1-84)
+         height; // height of window (1-6)
+         // width*height <= 32
+
+    byte x, y; // current position
+
+    union {
+        byte flat[256]; // variable width array
+        byte **buf;
+    };
+
+} LCDState;
 
 typedef struct
 {
@@ -39,8 +56,8 @@ typedef struct
                 //    (connected to Vcc)
 
     // internal LCD state
-    int lcd_x, lcd_y;   // current position
-    byte buf[LCD_X][LCD_Y/8];    // in-memory screen buffer
+    byte page; // current flash page backing the screen buffer
+    LCDState s; // state backed by the flash (the flash is out of date)
 
 } NokiaLCD;
 
@@ -49,7 +66,7 @@ void lcd_char(NokiaLCD *this, const char character);
                          // draw a char onscreen at the
                          //   current position
 void lcd_clear(NokiaLCD *this);     // clear the screen
-void lcd_init(NokiaLCD *this, Port port, Pin sce, Pin reset, Pin dc, Pin sdin, Pin sclk); // turn on and reset the LCD
+void lcd_init(NokiaLCD *this, Port port, Pin sce, Pin reset, Pin dc, Pin sdin, Pin sclk, byte left, byte top, byte width, byte height); // turn on and reset the LCD
 void lcd_string(NokiaLCD *this, const char *characters);
                          // draw a string onscreen starting
                          //   at the current position

@@ -13,6 +13,7 @@
 #define NOKIA_SCLK     p4
 #define NOKIA_SCE      p5
 #define NOKIA_RESET    p7
+#define NOKIA_PINS NOKIA_SCE, NOKIA_RESET, NOKIA_DC, NOKIA_SDIN, NOKIA_SCLK
 
 int main(void)
 {
@@ -27,13 +28,13 @@ int main(void)
     Morse jim;
     morse(&jim, LED_PORT, LED_PIN, 150);
     NokiaLCD nokia;
-    lcd_init(&nokia, NOKIA_PORT, NOKIA_SCE, NOKIA_RESET, NOKIA_DC, NOKIA_SDIN, NOKIA_SCLK);
+    lcd_init(&nokia, NOKIA_PORT, NOKIA_PINS, LCD_X/4, 0, LCD_X*3/4, LCD_Y/8/2);
     Key board;
     key(&board, KEY_PORT, KEY_PIN);
 
     _BIS_SR(GIE);
 
-    lcd_clear(&nokia);
+    lcd_drawbox(&nokia);
     lcd_gotoxy(&nokia, 0, 0);
     lcd_string(&nokia, "HI");
     lcd_gotoxy(&nokia, 0, 1);
@@ -57,26 +58,28 @@ int main(void)
                     break;
 
                 case '*':
-                    nokia.lcd_y++;
-                    if (nokia.lcd_y >= LCD_Y/8)
+                    nokia.s.y++;
+                    if (nokia.s.y >= nokia.s.height)
                     {
-                        nokia.lcd_y = 1;
+                        nokia.s.y = 1;
                     }
-                    lcd_gotoxy(&nokia, 1, nokia.lcd_y);
+                    lcd_gotoxy(&nokia, 1, nokia.s.y);
                     break;
 
                 case '#':
                     lcd_clear(&nokia);
+                    lcd_drawbox(&nokia);
                     lcd_gotoxy(&nokia, 0, 0);
                     lcd_string(&nokia, "HI");
-                    lcd_gotoxy(&nokia, 1, 1);
+                    lcd_gotoxy(&nokia, 0, 1);
+                    lcd_char(&nokia, '>');
                     break;
 
                 default:
                 {
-                    int y = nokia.lcd_y;
+                    int y = nokia.s.y;
                     lcd_char(&nokia, c);
-                    if (nokia.lcd_y != y)
+                    if (nokia.s.y != y)
                     {
                         lcd_char(&nokia, '>');
                     }
