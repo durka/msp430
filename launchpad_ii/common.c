@@ -1,5 +1,14 @@
 #include "common.h"
 
+void initProcessor()
+{
+    WDTCTL = WDTPW + WDTHOLD;
+    DCOCTL = 0;
+    BCSCTL1 = CALBC1_1MHZ;
+    DCOCTL = CALDCO_1MHZ;
+    FCTL2 = FWKEY + FSSEL0 + FN1;             // MCLK/3 for Flash Timing Generator
+}
+
 #define MS_TO_CYC (unsigned long)1000
 inline void sleep(unsigned long ms)
 {

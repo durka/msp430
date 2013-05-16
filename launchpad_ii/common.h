@@ -10,8 +10,11 @@
 #define PxIN(p)  PxX(p,IN)
 #define PxSEL(p) PxX(p,SEL)
 
-// useful datatype
+// useful datatypes
 typedef unsigned char byte;
+typedef unsigned char bool;
+#define true 1
+#define false 0
 
 typedef enum { P1=1, P2=2 }                                     Port;
 typedef enum { p0=0, p1=1, p2=2, p3=3, p4=4, p5=5, p6=6, p7=7 } Pin;
@@ -19,6 +22,7 @@ typedef enum { LOW=0, HIGH=1 }                                  PinState;
 typedef enum { INPUT, OUTPUT }                                  PinMode;
 typedef enum { MSBFIRST, LSBFIRST }                             BitOrder;
 
+void initProcessor(void);
 void sleep(unsigned long ms);
 void digitalWrite(Port port, Pin pin, PinState state);
 void pinMode(Port port, Pin pin, PinMode mode);

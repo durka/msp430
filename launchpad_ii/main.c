@@ -17,10 +17,7 @@
 
 int main(void)
 {
-    WDTCTL = WDTPW + WDTHOLD;
-    DCOCTL = 0;
-    BCSCTL1 = CALBC1_1MHZ;
-    DCOCTL = CALDCO_1MHZ;
+    initProcessor();
 
     pinMode(LED_PORT, LED_PIN, OUTPUT);
     digitalWrite(LED_PORT, LED_PIN, LOW);
