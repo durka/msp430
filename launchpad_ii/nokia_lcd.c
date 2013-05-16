@@ -156,12 +156,13 @@ void lcd_clear(NokiaLCD *this)
 {
     int index;
 
+    lcd_gotoxy(this, 0, 0);
     for (index = 0; index < LCD_X * LCD_Y / 8; index++)
     {                                   // clear every pixel
         lcd_write(this, LCD_D, 0x00);          // the LCD auto-updates
     }                                   //   its X/Y position
 
-    //memset(this->buf, 0, sizeof(byte)*LCD_X*LCD_Y/8);  // clear out screen buffer
+    memset(this->buf, 0, sizeof(byte)*LCD_X*LCD_Y/8);  // clear out screen buffer
 }
 
 // turn on and reset the LCD
@@ -188,8 +189,8 @@ void lcd_init(NokiaLCD *this, Port port, Pin sce, Pin reset, Pin dc, Pin sdin, P
 
     lcd_write(this,  LCD_CMD, 0x21 ); // LCD Extended Commands.
     lcd_write(this,  LCD_CMD, 0xBf ); // Set LCD Vop (Contrast). //B1
-    lcd_write(this,  LCD_CMD, 0x04 ); // Set Temp coefficent. //0x04
-    lcd_write(this,  LCD_CMD, 0x10 ); // LCD bias mode 1:48. //0x13
+    lcd_write(this,  LCD_CMD, 0x03 ); // Set Temp coefficent. //0x04
+    lcd_write(this,  LCD_CMD, 0x13 ); // LCD bias mode 1:48. //0x13
     lcd_write(this,  LCD_CMD, 0x0C ); // LCD in normal mode. 
                                //   0x0d for inverse
     lcd_write(this, LCD_C, 0x20);
