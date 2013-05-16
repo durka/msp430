@@ -10,7 +10,7 @@ CFLAGS = -mmcu=$(MCU)
 
 all: main
 
-%: %.elf
+main: main.elf
 	$(UPLOAD) rf2500 "prog $<"
 
 %.elf: %.c morse.o nokia_lcd.o key.o common.o
