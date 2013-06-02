@@ -1,3 +1,6 @@
+# Compiled executables
+*.elf
+
 # Compiled Object files
 *.slo
 *.lo
@@ -10,3 +13,7 @@
 *.lai
 *.la
 *.a
+
+# Vim detritus
+*.swp
+
