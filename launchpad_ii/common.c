@@ -7,6 +7,10 @@ void initProcessor()
     BCSCTL1 = CALBC1_1MHZ;
     DCOCTL = CALDCO_1MHZ;
     FCTL2 = FWKEY + FSSEL0 + FN1;             // MCLK/3 for Flash Timing Generator
+
+    flashClear(31);
+    flashClear(30);
+    flashClear(29);
 }
 
 #define MS_TO_CYC (unsigned long)1000
@@ -72,15 +76,82 @@ void shiftOut(Port dataport, Pin datapin, Port clockport, Pin clockpin, BitOrder
     }
 }
 
-void flashWrite(byte *source, byte page, unsigned short offset, unsigned short len)
+// INFO bank: page should be 'A', 'B', 'C', 'D'
+// ROM bank: page should be 0-31
+byte* get_flashptr(FlashBank bank, byte page)
 {
-    byte *flashptr;
-    unsigned int i;
+    switch (bank)
+    {
+        case INFO:
+            return (byte*)(0x10FF - (page-'A'+1)*64 + 1);
 
-    flashptr = (byte*)(0xFFFF - (page+1)*512 + 1);
+        case ROM:
+            return (byte*)(0xFFFF - (page+1)*512 + 1);
+    }
 }
 
-void flashRead(byte *dest, byte page, unsigned short offset, unsigned short len)
+void flashClear(Flashbank bank, byte page)
 {
+    byte *flashptr = get_flashptr(page);
+
+    FCTL1 = FWKEY + ERASE;                    // Set Erase bit
+    FCTL3 = FWKEY;                            // Clear Lock bit
+    *flashptr = 0;                           // Dummy write to erase Flash segment
+
+    FCTL1 = FWKEY;                            // Clear WRT bit
+    FCTL3 = FWKEY + LOCK;                     // Set LOCK bit
+}
+
+void flashWrite(const byte *source, FlashBank bank, byte page, unsigned short offset, unsigned short len)
+{
+    unsigned int i;
+    byte *flashptr = get_flashptr(bank, page);
+
+    flashClear(page);
+
+    FCTL1 = FWKEY + WRT;                     // Set Write bit
+    for (i = 0; i < (bank == INFO ? 64 : 512); ++i)
+    {
+        flashptr[i] = source[i];
+    }
+    FCTL1 = FWKEY;
+    FCTL3 = FWKEY + LOCK;
+}
+
+void flashRead(byte *dest, FlashBank bank, byte page, unsigned short offset, unsigned short len)
+{
+    unsigned int i;
+    byte *flashptr = get_flashptr(bank, page) + offset;
+
+    for (i = 0; i < len; ++i)
+    {
+        dest[i] = flashptr[i];
+    }
+
+}
+
+void flashCopy(const byte *source, FlashBank bank, byte pagefrom, byte pageto, unsigned short offset, unsigned short len)
+{
+    unsigned int i;
+    byte *fromptr = get_flashptr(bank, pagefrom);
+    byte *toptr = get_flashptr(bank, pageto);
+
+    flashClear(pageto);
+
+    FCTL1 = FWKEY + WRT;
+    for (i = 0; i < offset; ++i)
+    {
+        toptr[i] = fromptr[i];
+    }
+    for (; i < offset+len; ++i)
+    {
+        toptr[i] = source[i-offset];
+    }
+    for (; i < (bank == INFO ? 64 : 512); ++i)
+    {
+        toptr[i] = fromptr[i];
+    }
+    FCTL1 = FWKEY;
+    FCTL3 = FWKEY + LOCK;
 }
 

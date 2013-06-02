@@ -21,14 +21,16 @@ typedef enum { p0=0, p1=1, p2=2, p3=3, p4=4, p5=5, p6=6, p7=7 } Pin;
 typedef enum { LOW=0, HIGH=1 }                                  PinState;
 typedef enum { INPUT, OUTPUT }                                  PinMode;
 typedef enum { MSBFIRST, LSBFIRST }                             BitOrder;
+typedef enum { INFO, ROM }                                      FlashBank;
 
 void initProcessor(void);
 void sleep(unsigned long ms);
 void digitalWrite(Port port, Pin pin, PinState state);
 void pinMode(Port port, Pin pin, PinMode mode);
 void shiftOut(Port dataport, Pin datapin, Port clockport, Pin clockpin, BitOrder order, byte data);
-void flashWrite(byte *source, byte page, unsigned short offset, unsigned short len);
-void flashRead(byte *dest, byte page, unsigned short offset, unsigned short len);
+void flashClear(FlashBank bank, byte page);
+void flashWrite(byte *source, FlashBank bank, byte page, unsigned short offset, unsigned short len);
+void flashRead(byte *dest, FlashBank bank, byte page, unsigned short offset, unsigned short len);
 
 // TODO: MSP430 class, w/ utilities for watchdog, dco calib, etc? then we can track MS_TO_CYC
 
