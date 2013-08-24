@@ -33,8 +33,11 @@
 void lcd_raw_clear(NokiaLCD *this);
 void lcd_raw_write(NokiaLCD *this, byte dc, byte data);
 void lcd_raw_gotoxy(NokiaLCD *this, int xx, int yy);
-void lcd_save(NokiaLCD *this, bool full);
-void lcd_load(NokiaLCD *this, bool full);
+//void lcd_save(NokiaLCD *this, bool full);
+//void lcd_load(NokiaLCD *this, bool full);
+#define lcd_save lcd_noop
+#define lcd_load lcd_noop
+inline void lcd_noop(NokiaLCD *this, bool full) {}
 
 #include "nokia_font.inc"
 
